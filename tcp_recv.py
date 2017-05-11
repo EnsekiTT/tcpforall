@@ -1,4 +1,5 @@
 import socketserver
+import queue
 
 class MyTCPHandler(socketserver.BaseRequestHandler):
     """
@@ -14,15 +15,16 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         self.data = self.request.recv(1024).strip()
         print("{} wrote:".format(self.client_address[0]))
         print(self.data)
+        self.server.queue.put(self.data)
         # just send back the same data, but upper-cased
-        self.request.sendall("200")
+        self.request.sendall(("200").encode())
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 9999
-
+    queue = queue.Queue()
     # Create the server, binding to localhost on port 9999
     server = socketserver.TCPServer((HOST, PORT), MyTCPHandler)
-
+    server.queue = queue
     # Activate the server; this will keep running until you
     # interrupt the program with Ctrl-C
     server.serve_forever()
