@@ -1,18 +1,22 @@
-from multiprocessing import Process, Pipe
+from multiprocessing import Process, Pipe, Queue
 import tcp_recv
 import process
 import time
+import threading
 
 def main():
-    parent_conn, child_conn = Pipe()
-    parent_conn, child_conn = Pipe()
-    p1 = Process(target=process.func, args=(child_conn,))
-    p2 = Process(target=process.func, args=(child_conn,))
+    queue1 = Queue()
+    queue2 = Queue()
+    queues = [queue1, queue2]
+    thread = threading.Thread(target=tcp_recv.OpenRecv, args=(queues,))
+    p1 = Process(target=process.func, args=(queue1,))
+    p2 = Process(target=process.func, args=(queue2,))
 
+    thread.start()
     p1.start()
     p2.start()
-    parent_conn.send([20, None, 'hello'])
-    parent_conn.close
+    input("waiting>")
+    thread.join()
     p1.join()
     p2.join()
 

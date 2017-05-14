@@ -1,30 +1,27 @@
 import socketserver
-import queue
+import threading
 
 class MyTCPHandler(socketserver.BaseRequestHandler):
-    """
-    The request handler class for our server.
 
-    It is instantiated once per connection to the server, and must
-    override the handle() method to implement communication to the
-    client.
-    """
+    def putter(self, value):
+        for queue in self.server.queues:
+            queue.put(value)
 
     def handle(self):
         # self.request is the TCP socket connected to the client
         self.data = self.request.recv(1024).strip()
         print("{} wrote:".format(self.client_address[0]))
         print(self.data)
-        self.server.queue.put(self.data)
+        value = int(self.data)
+        self.putter(value = value)
         # just send back the same data, but upper-cased
         self.request.sendall(("200").encode())
 
-if __name__ == "__main__":
+def OpenRecv(queues):
     HOST, PORT = "localhost", 9999
-    queue = queue.Queue()
     # Create the server, binding to localhost on port 9999
     server = socketserver.TCPServer((HOST, PORT), MyTCPHandler)
-    server.queue = queue
+    server.queues = queues
     # Activate the server; this will keep running until you
     # interrupt the program with Ctrl-C
     server.serve_forever()

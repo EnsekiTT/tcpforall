@@ -1,4 +1,6 @@
 import time
 
-def func(conn):
-    print(conn.recv())
+def func(queue):
+    print("StartProcess")
+    while True:
+        print(queue.get())
