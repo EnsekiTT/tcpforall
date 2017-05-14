@@ -10,12 +10,11 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         # self.request is the TCP socket connected to the client
         self.data = self.request.recv(1024).strip()
-        print("{} wrote:".format(self.client_address[0]))
-        print(self.data)
+        print("{0} wrote: {1}".format(self.client_address[0], int(self.data)))
         value = int(self.data)
         self.putter(value = value)
         # just send back the same data, but upper-cased
-        self.request.sendall(("200").encode())
+        self.request.sendall(("ok").encode())
 
 def OpenRecv(queues):
     HOST, PORT = "localhost", 9999
